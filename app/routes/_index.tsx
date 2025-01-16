@@ -1,11 +1,29 @@
 import type { MetaFunction } from '@remix-run/node';
+import * as React from 'react';
 import { Button } from '~/components/ui/button';
+import { getDb } from '~/infrastructures/db';
 
 export const meta: MetaFunction = () => {
   return [{ title: 'New Remix App' }, { name: 'description', content: 'Welcome to Remix!' }];
 };
 
 export default function Index() {
+  const [data, setData] = React.useState<null | object[]>(null);
+  const test = async () => {
+    const db = await getDb();
+    const c = await db.connect();
+    const jsonRowContent = [
+      { col1: 1, col2: 'foo' },
+      { col1: 2, col2: 'bar' },
+    ];
+    await db.registerFileText('rows.json', JSON.stringify(jsonRowContent));
+    await c.insertJSONFromPath('rows.json', { name: 'rows' });
+
+    const table = await c.query('SELECT * FROM rows');
+
+    console.log(table.toArray().map((row) => row.toJSON()));
+    setData(table.toArray().map((row) => row.toJSON()));
+  };
   return (
     <div className="flex h-screen items-center justify-center">
       <div className="flex flex-col items-center gap-16">
@@ -37,7 +55,31 @@ export default function Index() {
               </li>
             ))}
           </ul>
-          <Button variant="default">test</Button>
+          <Button variant="default" onClick={test}>
+            test
+          </Button>
+
+          {data && data.length > 0 && (
+            <table>
+              <thead>
+                <tr>
+                  {Object.keys(data[0]).map((key) => (
+                    <th key={key}>{key}</th>
+                  ))}
+                </tr>
+              </thead>
+
+              <tbody>
+                {data.map((item, i) => (
+                  <tr key={`row-${i}`}>
+                    {Object.values(item).map((value) => (
+                      <td key={value}>{value}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </nav>
       </div>
     </div>
