@@ -61,13 +61,12 @@ export default function Index() {
           <Sidebar
             onFileUpload={() => {}}
             onLoadQuery={(query: string) => {}}
-            presetQueries={[
+            savedQueries={[
               {
                 name: "カラム一覧",
                 query: "SELECT * FROM data LIMIT 0",
               },
             ]}
-            savedQueries={[]}
           />
         </ResizablePanel>
         <ResizableHandle withHandle />
@@ -75,12 +74,13 @@ export default function Index() {
           <ResizablePanelGroup direction="vertical">
             <ResizablePanel>
               <ClientOnly>{() => <SqlEditor />}</ClientOnly>
-              <Button variant="default" onClick={test}>
-                test
-              </Button>
             </ResizablePanel>
             <ResizableHandle withHandle />
             <ResizablePanel>
+              <div className="flex justify-end space-x-2">
+                <Button>Save Query</Button>
+                <Button onClick={test}>Run</Button>
+              </div>
               <div className="h-full">
                 <DataTable
                   columns={Object.keys(data[0] ?? {}).map((key) => ({

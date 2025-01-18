@@ -27,7 +27,7 @@ const Sidebar: React.FC<Props> = (
   ];
 
   return (
-    <div className="h-full flex flex-col gap-4 p-4">
+    <div className="h-full flex flex-col gap-8 p-4">
       {/* ファイルアップロード部分 */}
       <div className="space-y-2">
         <h2 className="text-sm font-semibold">ファイル</h2>
@@ -73,6 +73,8 @@ const Sidebar: React.FC<Props> = (
             <Button
               key={index}
               onClick={() => onLoadQuery(saved.query)}
+              variant="ghost"
+              className="w-full justify-start"
             >
               <Save className="w-4 h-4" />
               {saved.name}
