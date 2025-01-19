@@ -34,10 +34,10 @@ const Sidebar: React.FC<Props> = (
         <Button asChild variant="ghost" className="w-full justify-start">
           <label className="flex items-center gap-2">
             <Upload className="w-4 h-4" />
-            <span>CSVをアップロード</span>
+            <span>ファイルアップロード</span>
             <input
               type="file"
-              accept=".csv"
+              accept=".jsonl,.log"
               onChange={onFileUpload}
               className="hidden"
             />

@@ -1,7 +1,6 @@
 import type { MetaFunction } from "@remix-run/node";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
-import { getDb } from "@/infrastructures/db";
 import { DataTable } from "@/components/DataTable";
 import SqlEditor from "@/components/SqlEditor.client";
 import { ClientOnly } from "remix-utils/client-only";
@@ -11,6 +10,7 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import Sidebar from "@/components/Sidebar";
+import { useDatabase } from "@/providers/DuckDbProvider";
 
 export const meta: MetaFunction = () => {
   return [{ title: "New Remix App" }, {
@@ -21,9 +21,9 @@ export const meta: MetaFunction = () => {
 
 export default function Index() {
   const [data, setData] = React.useState<object[]>([]);
+  const dbContext = useDatabase();
   const test = async () => {
-    const db = await getDb();
-    const c = await db.connect();
+    const { db, connection } = dbContext;
     const jsonRowContent = [
       {
         col1: 1,
@@ -43,9 +43,9 @@ export default function Index() {
       },
     ];
     await db.registerFileText("rows.json", JSON.stringify(jsonRowContent));
-    await c.insertJSONFromPath("rows.json", { name: "rows" });
+    await connection.insertJSONFromPath("rows.json", { name: "rows" });
 
-    const table = await c.query("SELECT * FROM rows");
+    const table = await connection.query("SELECT * FROM rows");
 
     console.log(table.toArray().map((row) => row.toJSON()));
     console.log(
@@ -69,14 +69,14 @@ export default function Index() {
             ]}
           />
         </ResizablePanel>
-        <ResizableHandle withHandle />
-        <ResizablePanel>
+        <ResizableHandle withHandle className="hover:visible" />
+        <ResizablePanel defaultSize={80}>
           <ResizablePanelGroup direction="vertical">
-            <ResizablePanel>
+            <ResizablePanel defaultSize={30}>
               <ClientOnly>{() => <SqlEditor />}</ClientOnly>
             </ResizablePanel>
             <ResizableHandle withHandle />
-            <ResizablePanel>
+            <ResizablePanel defaultSize={70}>
               <div className="flex justify-end space-x-2">
                 <Button>Save Query</Button>
                 <Button onClick={test}>Run</Button>
