@@ -24,6 +24,12 @@ const DuckDbProvider = ({ children }: PropsWithChildren) => {
       .finally(() => {
         setIsLoading(false);
       });
+
+    return () => {
+      if (context) {
+        context.connection.close();
+      }
+    };
   });
 
   if (isLoading) {

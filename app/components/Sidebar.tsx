@@ -1,6 +1,7 @@
 import { Database, Save, Upload } from "lucide-react";
-import React from "react";
+import React, { useCallback } from "react";
 import { Button } from "./ui/button";
+import { useDatabase } from "@/providers/DuckDbProvider";
 
 type Props = {
   onFileUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -26,6 +27,36 @@ const Sidebar: React.FC<Props> = (
     },
   ];
 
+  const { db, connection } = useDatabase();
+
+  const handleFileUpload = useCallback(
+    async (event: React.ChangeEvent<HTMLInputElement>) => {
+      console.log("file upload");
+      console.log(event);
+      const file = event.target.files?.[0];
+      if (!file) return;
+
+      try {
+        await db.registerFileBuffer(
+          "rows.json",
+          new Uint8Array(await file.arrayBuffer()),
+        );
+
+        await connection.query(
+          `CREATE TABLE IF NOT EXISTS rows AS SELECT * FROM read_json('rows.json')`,
+        );
+
+        onFileUpload(event);
+      } catch (e) {
+        console.error(e);
+        return;
+      }
+
+      // onFileUpload(event);
+    },
+    [db, connection],
+  );
+
   return (
     <div className="h-full flex flex-col gap-8 p-4">
       {/* ファイルアップロード部分 */}
@@ -38,7 +69,7 @@ const Sidebar: React.FC<Props> = (
             <input
               type="file"
               accept=".jsonl,.log"
-              onChange={onFileUpload}
+              onChange={handleFileUpload}
               className="hidden"
             />
           </label>

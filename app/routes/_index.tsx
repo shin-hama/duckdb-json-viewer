@@ -23,29 +23,8 @@ export default function Index() {
   const [data, setData] = React.useState<object[]>([]);
   const dbContext = useDatabase();
   const test = async () => {
-    const { db, connection } = dbContext;
-    const jsonRowContent = [
-      {
-        col1: 1,
-        col2: "foo",
-        col3: "bar",
-        col4: "baz",
-        col5: "qux",
-        col6: "quux",
-      },
-      {
-        col1: 1,
-        col2: "foo",
-        col3: "bar",
-        col4: "baz",
-        col5: "qux",
-        col6: "quux",
-      },
-    ];
-    await db.registerFileText("rows.json", JSON.stringify(jsonRowContent));
-    await connection.insertJSONFromPath("rows.json", { name: "rows" });
-
-    const table = await connection.query("SELECT * FROM rows");
+    const { connection } = dbContext;
+    const table = await connection.query("SELECT * FROM rows LIMIT 10");
 
     console.log(table.toArray().map((row) => row.toJSON()));
     console.log(
@@ -59,7 +38,7 @@ export default function Index() {
       <ResizablePanelGroup direction="horizontal">
         <ResizablePanel minSize={15} maxSize={40} defaultSize={20}>
           <Sidebar
-            onFileUpload={() => {}}
+            onFileUpload={test}
             onLoadQuery={(query: string) => {}}
             savedQueries={[
               {
