@@ -50,12 +50,6 @@ export default function Index() {
               runQuery("SELECT * FROM rows LIMIT 10");
             }}
             onLoadQuery={setQuery}
-            savedQueries={[
-              {
-                name: "カラム一覧",
-                query: "SELECT * FROM rows LIMIT 10",
-              },
-            ]}
           />
         </ResizablePanel>
         <ResizableHandle withHandle className="hover:visible" />
