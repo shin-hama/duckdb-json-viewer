@@ -22,15 +22,22 @@ export const meta: MetaFunction = () => {
 export default function Index() {
   const [data, setData] = React.useState<object[]>([]);
   const dbContext = useDatabase();
-  const test = async () => {
-    const { connection } = dbContext;
-    const table = await connection.query("SELECT * FROM rows LIMIT 10");
 
-    console.log(table.toArray().map((row) => row.toJSON()));
-    console.log(
-      Object.keys(data).map((key) => ({ header: key, accessorKey: key })),
-    );
-    setData(table.toArray().map((row) => row.toJSON()));
+  const [query, setQuery] = React.useState("");
+
+  const runQuery = async (query: string) => {
+    const { connection } = dbContext;
+    try {
+      const table = await connection.query(query);
+
+      console.log(table.toArray().map((row) => row.toJSON()));
+      console.log(
+        Object.keys(data).map((key) => ({ header: key, accessorKey: key })),
+      );
+      setData(table.toArray().map((row) => row.toJSON()));
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   return (
@@ -38,12 +45,15 @@ export default function Index() {
       <ResizablePanelGroup direction="horizontal">
         <ResizablePanel minSize={15} maxSize={40} defaultSize={20}>
           <Sidebar
-            onFileUpload={test}
-            onLoadQuery={(query: string) => {}}
+            onFileUpload={() => {
+              setQuery("SELECT * FROM rows LIMIT 10");
+              runQuery("SELECT * FROM rows LIMIT 10");
+            }}
+            onLoadQuery={setQuery}
             savedQueries={[
               {
                 name: "カラム一覧",
-                query: "SELECT * FROM data LIMIT 0",
+                query: "SELECT * FROM rows LIMIT 10",
               },
             ]}
           />
@@ -52,13 +62,19 @@ export default function Index() {
         <ResizablePanel defaultSize={80}>
           <ResizablePanelGroup direction="vertical">
             <ResizablePanel defaultSize={30}>
-              <ClientOnly>{() => <SqlEditor />}</ClientOnly>
+              <ClientOnly>
+                {() => (
+                  <SqlEditor
+                    value={query}
+                    onChange={setQuery}
+                  />
+                )}
+              </ClientOnly>
             </ResizablePanel>
             <ResizableHandle withHandle />
             <ResizablePanel defaultSize={70}>
-              <div className="flex justify-end space-x-2">
-                <Button>Save Query</Button>
-                <Button onClick={test}>Run</Button>
+              <div className="flex justify-end space-x-2 p-2">
+                <Button onClick={() => runQuery(query)}>Run</Button>
               </div>
               <div className="h-full">
                 <DataTable

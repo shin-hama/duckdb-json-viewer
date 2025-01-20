@@ -15,15 +15,22 @@ const Sidebar: React.FC<Props> = (
   const presetQueries = [
     {
       name: "全件表示 (10件)",
-      query: "SELECT * FROM data LIMIT 10",
+      query: "SELECT * FROM rows LIMIT 10;",
     },
     {
       name: "件数カウント",
-      query: "SELECT COUNT(*) as count FROM data",
+      query: "SELECT COUNT(*) as count FROM rows;",
     },
     {
       name: "カラム一覧",
-      query: "SELECT * FROM data LIMIT 0",
+      query: `SELECT
+  column_name,
+  data_type,
+  character_maximum_length,
+  column_default,
+  is_nullable
+FROM
+  information_schema.columns;`,
     },
   ];
 
