@@ -3,12 +3,28 @@ import { vscodeDark } from "@uiw/codemirror-theme-vscode";
 import ReactCodeMirror from "@uiw/react-codemirror";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
+import { useQueryRepository } from "@/hooks/useQueryRepository";
+import { useCallback, useState } from "react";
 
 type Props = {
   value: string;
   onChange: (value: string) => void;
 };
 const SqlEditor = (props: Props) => {
+  const [name, setName] = useState("New Query");
+  const repo = useQueryRepository();
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSaveQuery = useCallback(() => {
+    if (!name) {
+      setError("Query name is required.");
+      return;
+    }
+
+    setError(null);
+    repo.saveQuery(name, props.value);
+  }, [name, props.value, repo]);
+
   return (
     <div className="w-full h-full flex flex-col">
       <div className="flex items-center justify-between p-2">
@@ -17,15 +33,18 @@ const SqlEditor = (props: Props) => {
             <h2 className="text-sm font-semibold">SQL Editor</h2>
             <p>/</p>
           </div>
-          <div>
+          <div className="flex items-center space-x-2">
             <Input
-              defaultValue="New Query"
-              placeholder="Query Name"
-              className="border-0 min-w-120 p-1 h-8 hover:bg-accent"
+              required
+              defaultValue={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Input query name..."
+              className={`min-w-120 p-1 h-8 hover:bg-accent`}
             />
+            {error && <p className="text-red-500 text-xs w-full">{error}</p>}
           </div>
         </div>
-        <Button>Save Query</Button>
+        <Button onClick={handleSaveQuery}>Save Query</Button>
       </div>
       <ReactCodeMirror
         extensions={[sql()]}

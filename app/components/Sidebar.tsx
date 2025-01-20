@@ -1,15 +1,15 @@
 import { Database, Save, Upload } from "lucide-react";
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import { Button } from "./ui/button";
 import { useDatabase } from "@/providers/DuckDbProvider";
+import { useQueryRepository } from "@/hooks/useQueryRepository";
 
 type Props = {
   onFileUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  savedQueries: { name: string; query: string }[];
   onLoadQuery: (query: string) => void;
 };
 const Sidebar: React.FC<Props> = (
-  { onFileUpload, savedQueries, onLoadQuery },
+  { onFileUpload, onLoadQuery },
 ) => {
   // プリセットクエリ
   const presetQueries = [
@@ -33,6 +33,8 @@ FROM
   information_schema.columns;`,
     },
   ];
+
+  const { getAllQueries } = useQueryRepository();
 
   const { db, connection } = useDatabase();
 
@@ -63,6 +65,15 @@ FROM
     },
     [db, connection],
   );
+
+  const savedQueries = useMemo(() => {
+    return Object.entries(getAllQueries()).sort((a, b) => {
+      return a[1].updatedAt > b[1].updatedAt ? -1 : 1;
+    }).map(([name, query]) => ({
+      name,
+      query: query.query,
+    }));
+  }, [getAllQueries]);
 
   return (
     <div className="h-full flex flex-col gap-8 p-4">
