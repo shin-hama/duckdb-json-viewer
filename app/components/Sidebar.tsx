@@ -1,28 +1,26 @@
-import { Database, Save, Upload } from "lucide-react";
-import React, { useCallback, useMemo } from "react";
-import { Button } from "./ui/button";
-import { useDatabase } from "@/providers/DuckDbProvider";
-import { useQueryRepository } from "@/hooks/useQueryRepository";
+import { Database, Save, Upload } from 'lucide-react';
+import React, { useCallback, useMemo } from 'react';
+import { Button } from './ui/button';
+import { useDatabase } from '@/providers/DuckDbProvider';
+import { useQueryRepository } from '@/hooks/useQueryRepository';
 
 type Props = {
   onFileUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onLoadQuery: (query: string) => void;
 };
-const Sidebar: React.FC<Props> = (
-  { onFileUpload, onLoadQuery },
-) => {
+const Sidebar: React.FC<Props> = ({ onFileUpload, onLoadQuery }) => {
   // プリセットクエリ
   const presetQueries = [
     {
-      name: "全件表示 (10件)",
-      query: "SELECT * FROM rows LIMIT 10;",
+      name: '全件表示 (10件)',
+      query: 'SELECT * FROM rows LIMIT 10;',
     },
     {
-      name: "件数カウント",
-      query: "SELECT COUNT(*) as count FROM rows;",
+      name: '件数カウント',
+      query: 'SELECT COUNT(*) as count FROM rows;',
     },
     {
-      name: "カラム一覧",
+      name: 'カラム一覧',
       query: `SELECT
   column_name,
   data_type,
@@ -40,19 +38,16 @@ FROM
 
   const handleFileUpload = useCallback(
     async (event: React.ChangeEvent<HTMLInputElement>) => {
-      console.log("file upload");
+      console.log('file upload');
       console.log(event);
       const file = event.target.files?.[0];
       if (!file) return;
 
       try {
-        await db.registerFileBuffer(
-          "rows.json",
-          new Uint8Array(await file.arrayBuffer()),
-        );
+        await db.registerFileBuffer('rows.json', new Uint8Array(await file.arrayBuffer()));
 
         await connection.query(
-          `CREATE TABLE IF NOT EXISTS rows AS SELECT * FROM read_json('rows.json')`,
+          `CREATE TABLE IF NOT EXISTS rows AS SELECT * FROM read_json('rows.json', filename=true, union_by_name=true)`,
         );
 
         onFileUpload(event);
@@ -67,12 +62,14 @@ FROM
   );
 
   const savedQueries = useMemo(() => {
-    return Object.entries(getAllQueries()).sort((a, b) => {
-      return a[1].updatedAt > b[1].updatedAt ? -1 : 1;
-    }).map(([name, query]) => ({
-      name,
-      query: query.query,
-    }));
+    return Object.entries(getAllQueries())
+      .sort((a, b) => {
+        return a[1].updatedAt > b[1].updatedAt ? -1 : 1;
+      })
+      .map(([name, query]) => ({
+        name,
+        query: query.query,
+      }));
   }, [getAllQueries]);
 
   return (
@@ -114,9 +111,7 @@ FROM
 
       {/* 保存済みSQL部分 */}
       <div className="space-y-2">
-        <h2 className="text-sm font-semibold">
-          保存済みSQL ({savedQueries.length})
-        </h2>
+        <h2 className="text-sm font-semibold">保存済みSQL ({savedQueries.length})</h2>
         <div className="space-y-1">
           {savedQueries.map((saved, index) => (
             <Button

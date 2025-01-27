@@ -1,29 +1,28 @@
-import type { MetaFunction } from "@remix-run/node";
-import * as React from "react";
-import { Button } from "@/components/ui/button";
-import { DataTable } from "@/components/DataTable";
-import SqlEditor from "@/components/SqlEditor.client";
-import { ClientOnly } from "remix-utils/client-only";
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "@/components/ui/resizable";
-import Sidebar from "@/components/Sidebar";
-import { useDatabase } from "@/providers/DuckDbProvider";
+import type { MetaFunction } from '@remix-run/node';
+import * as React from 'react';
+import { Button } from '@/components/ui/button';
+import { DataTable } from '@/components/DataTable';
+import SqlEditor from '@/components/SqlEditor.client';
+import { ClientOnly } from 'remix-utils/client-only';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
+import Sidebar from '@/components/Sidebar';
+import { useDatabase } from '@/providers/DuckDbProvider';
 
 export const meta: MetaFunction = () => {
-  return [{ title: "New Remix App" }, {
-    name: "description",
-    content: "Welcome to Remix!",
-  }];
+  return [
+    { title: 'New Remix App' },
+    {
+      name: 'description',
+      content: 'Welcome to Remix!',
+    },
+  ];
 };
 
 export default function Index() {
   const [data, setData] = React.useState<object[]>([]);
   const dbContext = useDatabase();
 
-  const [query, setQuery] = React.useState("");
+  const [query, setQuery] = React.useState('');
 
   const runQuery = async (query: string) => {
     const { connection } = dbContext;
@@ -31,9 +30,7 @@ export default function Index() {
       const table = await connection.query(query);
 
       console.log(table.toArray().map((row) => row.toJSON()));
-      console.log(
-        Object.keys(data).map((key) => ({ header: key, accessorKey: key })),
-      );
+      console.log(Object.keys(data).map((key) => ({ header: key, accessorKey: key })));
       setData(table.toArray().map((row) => row.toJSON()));
     } catch (e) {
       console.error(e);
@@ -46,8 +43,8 @@ export default function Index() {
         <ResizablePanel minSize={15} maxSize={40} defaultSize={20}>
           <Sidebar
             onFileUpload={() => {
-              setQuery("SELECT * FROM rows LIMIT 10");
-              runQuery("SELECT * FROM rows LIMIT 10");
+              setQuery('SELECT * FROM rows LIMIT 10');
+              runQuery('SELECT * FROM rows LIMIT 10');
             }}
             onLoadQuery={setQuery}
           />
@@ -56,28 +53,23 @@ export default function Index() {
         <ResizablePanel defaultSize={80}>
           <ResizablePanelGroup direction="vertical">
             <ResizablePanel defaultSize={30}>
-              <ClientOnly>
-                {() => (
-                  <SqlEditor
-                    value={query}
-                    onChange={setQuery}
-                  />
-                )}
-              </ClientOnly>
+              <ClientOnly>{() => <SqlEditor value={query} onChange={setQuery} />}</ClientOnly>
             </ResizablePanel>
             <ResizableHandle withHandle />
             <ResizablePanel defaultSize={70}>
-              <div className="flex justify-end space-x-2 p-2">
-                <Button onClick={() => runQuery(query)}>Run</Button>
-              </div>
-              <div className="h-full">
-                <DataTable
-                  columns={Object.keys(data[0] ?? {}).map((key) => ({
-                    header: key,
-                    accessorKey: key,
-                  }))}
-                  data={data}
-                />
+              <div className="flex flex-col h-full">
+                <div className="flex justify-end space-x-2 p-2">
+                  <Button onClick={() => runQuery(query)}>Run</Button>
+                </div>
+                <div className="flex-1 overflow-hidden">
+                  <DataTable
+                    columns={Object.keys(data[0] ?? {}).map((key) => ({
+                      header: key,
+                      accessorKey: key,
+                    }))}
+                    data={data}
+                  />
+                </div>
               </div>
             </ResizablePanel>
           </ResizablePanelGroup>

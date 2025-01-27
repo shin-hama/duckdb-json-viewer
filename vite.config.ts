@@ -1,8 +1,8 @@
-import { vitePlugin as remix } from "@remix-run/dev";
-import { defineConfig } from "vite";
-import tsconfigPaths from "vite-tsconfig-paths";
+import { vitePlugin as remix } from '@remix-run/dev';
+import { defineConfig } from 'vite';
+import tsconfigPaths from 'vite-tsconfig-paths';
 
-declare module "@remix-run/node" {
+declare module '@remix-run/node' {
   interface Future {
     v3_singleFetch: true;
   }
@@ -10,10 +10,11 @@ declare module "@remix-run/node" {
 
 export default defineConfig({
   ssr: {
-    noExternal: ["react-use"],
+    noExternal: ['react-use'],
   },
   plugins: [
     remix({
+      ssr: false,
       future: {
         v3_fetcherPersist: true,
         v3_relativeSplatPath: true,
